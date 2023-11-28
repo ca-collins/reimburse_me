@@ -2,7 +2,6 @@ require 'date'
 
 def calculate_reimbursements(project_sets, reimbursement_rates)
     total_reimbursements = project_sets.map do |set|
-        puts "SET: #{set['set_name']}"
         calculate_reimbursement_for_set(set['projects'], reimbursement_rates)
     end
 end
@@ -24,10 +23,8 @@ def calculate_reimbursement_for_set(projects, rates)
 
     # Process each project
     sorted_projects.each do |project|
-        puts "PROJECT: #{project['project_name']}"
         city_cost = project['city_cost']
         # Iterate through each day of the project
-        puts "start processing"
         (project['start_date']..project['end_date']).each do |day|
             updatedDay = {}
             if processed_days[day]
@@ -41,9 +38,7 @@ def calculate_reimbursement_for_set(projects, rates)
                 updatedDay = process_day(day, project, sorted_projects, rates)
             end
             processed_days[day] = updatedDay
-            puts "DAY: #{day} - #{processed_days[day]}"
         end
-        puts "end processing"
     end
 
     # Calculate reimbursement from processed days
