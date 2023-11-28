@@ -54,43 +54,37 @@ def re_process_day(day, process_day, project_city_cost, rates)
 end
 
 def process_day(day, project, sorted_projects, rates)
+    day_type = determine_day_type(day, project, sorted_projects)
 
-    # Check for overlaps and gaps
-    project_index = sorted_projects.index(project)
-    next_project = sorted_projects[project_index + 1] if project_index < sorted_projects.length - 1
-    last_project = sorted_projects[project_index - 1] if project_index > 0
-
-    day_type = 'full'
-
-    # if the first day of the first project it is a travel day
-    if project_index == 0 && day == project['start_date']
-        day_type = 'travel'
-    end
-    
-    # if the last day of the last project it is a travel day
-    if project_index == sorted_projects.length - 1 && day == project['end_date']
-        day_type = 'travel'
-    end
-
-    # if the last project there is a gap between the last project and this one
-    if last_project && day == project['start_date']
-        last_end_date = last_project['end_date']
-        # Check for a gap
-        if last_end_date < project['start_date'] - 1
-            day_type = 'travel'
-        end
-    end
-
-    if next_project && day == project['end_date']
-        next_start_date = next_project['start_date']
-        # Check for a gap
-        if next_start_date > project['end_date'] + 1
-            day_type = 'travel'
-        end
-    end
     {
         'day_type' => day_type,
         'city_cost' => project['city_cost'],
         'rate' => rates["#{project['city_cost']}_cost_city"][day_type]
     }
+end
+
+def determine_day_type(day, project, sorted_projects)
+    project_index = sorted_projects.index(project)
+    is_first_day = project_index == 0 && day == project['start_date']
+    is_last_day = project_index == sorted_projects.length - 1 && day == project['end_date']
+    is_gap_before = gap_before_project?(day, project, sorted_projects, project_index)
+    is_gap_after = gap_after_project?(day, project, sorted_projects, project_index)
+
+    if is_first_day || is_last_day || is_gap_before || is_gap_after
+        'travel'
+    else
+        'full'
+    end
+end
+
+def gap_before_project?(day, project, sorted_projects, project_index)
+    return false if project_index == 0
+    last_project = sorted_projects[project_index - 1]
+    last_project['end_date'] < project['start_date'] - 1
+end
+
+def gap_after_project?(day, project, sorted_projects, project_index)
+    return false if project_index == sorted_projects.length - 1
+    next_project = sorted_projects[project_index + 1]
+    next_project['start_date'] > project['end_date'] + 1
 end
