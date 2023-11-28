@@ -1,7 +1,4 @@
-def hello_world(string)
-    puts string
+def calculate_reimbursements(project_sets, reimbursement_rates)
+    results = []
+    results
 end
-  
-  string = "hello world"
-  hello_world(string)
-  

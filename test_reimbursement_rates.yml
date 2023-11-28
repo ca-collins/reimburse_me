@@ -1,0 +1,6 @@
+low_cost_city:
+  travel: 45
+  full: 75
+high_cost_city:
+  travel: 55
+  full: 85
