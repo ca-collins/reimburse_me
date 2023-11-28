@@ -26,18 +26,13 @@ def calculate_reimbursement_for_set(projects, rates)
         city_cost = project['city_cost']
         # Iterate through each day of the project
         (project['start_date']..project['end_date']).each do |day|
-            updatedDay = {}
+            updated_day = {}
             if processed_days[day]
-                updatedDay = processed_days[day].dup
-                # overlapping days are always full days
-                updatedDay['day_type'] = 'full'
-                # always use the high cost if any day is high cost
-                updatedDay['city_cost'] = processed_days[day]['city_cost'] === 'high' ? 'high' : city_cost
-                updatedDay['rate'] = rates["#{updatedDay['city_cost']}_cost_city"]['full']
+                updated_day = re_process_day(day, processed_days[day], project['city_cost'], rates)              
             else
-                updatedDay = process_day(day, project, sorted_projects, rates)
+                updated_day = process_day(day, project, sorted_projects, rates)
             end
-            processed_days[day] = updatedDay
+            processed_days[day] = updated_day
         end
     end
 
@@ -46,6 +41,16 @@ def calculate_reimbursement_for_set(projects, rates)
         total_reimbursement += day_data['rate']
     end
     total_reimbursement
+end
+
+def re_process_day(day, process_day, project_city_cost, rates)
+    updated_day = process_day.dup
+    # overlapping days are always full days
+    updated_day['day_type'] = 'full'
+    # always use the high cost if any day is high cost
+    updated_day['city_cost'] = process_day['city_cost'] === 'high' ? 'high' : project_city_cost
+    updated_day['rate'] = rates["#{updated_day['city_cost']}_cost_city"]['full']
+    updated_day
 end
 
 def process_day(day, project, sorted_projects, rates)
